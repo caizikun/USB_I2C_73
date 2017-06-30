@@ -52,9 +52,6 @@
 #include "i2c.h"
 #include "stm32l0xx_nucleo.h"
 #include "usbd_cdc_if.h"
-
-I2C_HandleTypeDef I2cHandle;   
-
     
 /* Buffer used for transmission */
 //uint8_t aTxBuffer[] = {0x33, 0x34};
@@ -75,6 +72,7 @@ uint8_t bTransferRequest = 0;
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef I2cHandle;
+IWDG_HandleTypeDef hiwdg;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -84,6 +82,7 @@ I2C_HandleTypeDef I2cHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_IWDG_Init(void);
 static uint16_t Buffercmp(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t BufferLength);
 static void Flush_Buffer(uint8_t* pBuffer, uint16_t BufferLength);
 
@@ -121,7 +120,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  
+  MODSELL_Init();
+  MX_IWDG_Init();
   /* I2C2 init function */
   I2C_Init();  
   
@@ -161,7 +161,7 @@ int main(void)
   {
     if(USB_USART_RX_STA&0x8000)
     {  
-      HAL_Delay(25);
+      //HAL_Delay(25);
       
       read_write = USB_USART_RX_Buffer[3];
       deviceAddress = USB_USART_RX_Buffer[4];
@@ -194,7 +194,8 @@ int main(void)
         
         /* Flush Rx buffers */
         Flush_Buffer((uint8_t*)aRxBuffer,RXBUFFERSIZE);
-      }
+      }      
+
       
       if(read_write==MASTER_REQ_WRITE)
       {
@@ -210,6 +211,13 @@ int main(void)
         }
         while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
       }
+    }
+    
+    /* Refresh IWDG: reload counter */
+    if(HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
+    {
+      /* Refresh Error */
+      Error_Handler();
     }
   }
 #else
@@ -291,6 +299,20 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   //__HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+}
+
+static void MX_IWDG_Init(void)
+{
+
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_64;
+  hiwdg.Init.Window = 0xfff;
+  hiwdg.Init.Reload = 0xfff;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
 }
 
