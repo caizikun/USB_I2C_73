@@ -6,6 +6,8 @@ The USB-I2C eval board provides a complete interface between your PC and the I2C
 
 You should understand how to work between app and firmware. The following chart shows windows framework.This repository is source code of firmware.-->firmware development.
 
+Please see [elec drawing file](https://github.com/tclxspy/USB_I2C_73/blob/master/drawing/1021001.pdf).
+
 Please see ["SNOEC_GUI" repository](https://github.com/tclxspy/SNOEC_GUI) for app development.
 
 ![](http://i.imgur.com/MP1gyhI.jpg)
