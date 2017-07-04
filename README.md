@@ -4,6 +4,10 @@ The USB-I2C eval board provides a complete interface between your PC and the I2C
 
 ## First Step - Get The Drivers ##
 
+You should understand how to work between app and firmware. The following chart shows windows framework.This repository is source code of firmware.-->firmware development.
+
+Please see ["SNOEC_GUI" repository](https://github.com/tclxspy/SNOEC_GUI) for app development.
+
 ![](http://i.imgur.com/MP1gyhI.jpg)
 
 ## Which COM port? ##
@@ -12,10 +16,10 @@ After installing the drivers, and plugging in the USB-I2C module to a spare USB 
 
 ![](http://i.imgur.com/JC0oCQq.jpg)
 
-## Example by softkit##
+## Example by softkit ##
 
 ![](http://i.imgur.com/MPvuCdw.jpg)
 
-## Operate with SNOEC_GUI##
+## Operate with SNOEC_GUI ##
 
-![](http://i.imgur.com/H6AExwg.jpg)
+Click link: [https://github.com/tclxspy/SNOEC_GUI](https://github.com/tclxspy/SNOEC_GUI)
