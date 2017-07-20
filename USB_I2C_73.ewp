@@ -1969,6 +1969,9 @@
     <file>
       <name>$PROJ_DIR$\HARDWARE\ModSeLL\modsel.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\HARDWARE\I2C\soft_i2c.c</name>
+    </file>
   </group>
   <group>
     <name>USB_Config</name>

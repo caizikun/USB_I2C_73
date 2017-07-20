@@ -50,9 +50,11 @@
 #include "stm32l0xx_hal.h"
 #include "usb_device.h"
 #include "i2c.h"
+#include "soft_i2c.h"
 #include "stm32l0xx_nucleo.h"
 #include "usbd_cdc_if.h"
-    
+#include "modsel.h"
+
 /* Buffer used for transmission */
 //uint8_t aTxBuffer[] = {0x33, 0x34};
 //uint8_t aTxBuffer[] = {0x46, 0x54};//{"FT"}
@@ -63,8 +65,6 @@ uint8_t aRxBuffer[RXBUFFERSIZE];
 __IO uint16_t hTxNumData = 0;
 __IO uint16_t hRxNumData = 0;
 uint8_t bTransferRequest = 0;
-
-
 
 /* USER CODE BEGIN Includes */
 
@@ -83,8 +83,6 @@ IWDG_HandleTypeDef hiwdg;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_IWDG_Init(void);
-static uint16_t Buffercmp(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t BufferLength);
-static void Flush_Buffer(uint8_t* pBuffer, uint16_t BufferLength);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -97,7 +95,6 @@ static void Flush_Buffer(uint8_t* pBuffer, uint16_t BufferLength);
 
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -121,10 +118,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MODSELL_Init();
-  MX_IWDG_Init();
-  /* I2C2 init function */
+  /* I2C2 init function */ 
+#ifdef HARDWARE_I2C  
   I2C_Init();  
+#else 
+  Soft_I2C_Init();
+#endif /* HARDWARE_I2C */
   
+  MX_IWDG_Init();
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
@@ -156,13 +157,11 @@ int main(void)
   uint8_t length;
   uint8_t read_write;
   
-#ifdef MASTER_BOARD
+#ifdef HARDWARE_I2C
   while(1)
   {
     if(USB_USART_RX_STA&0x8000)
-    {  
-      //HAL_Delay(25);
-      
+    {
       read_write = USB_USART_RX_Buffer[3];
       deviceAddress = USB_USART_RX_Buffer[4];
       regAddress = USB_USART_RX_Buffer[5];
@@ -184,18 +183,13 @@ int main(void)
           {
             /* Error_Handler() function is called when error occurs. */
             Error_Handler();
-          }
-          
+          }          
           while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY){}
         }
         while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
         
-        CDC_Transmit_FS(aRxBuffer, length);
-        
-        /* Flush Rx buffers */
-        Flush_Buffer((uint8_t*)aRxBuffer,RXBUFFERSIZE);
-      }      
-
+        CDC_Transmit_FS(aRxBuffer, length);       
+      }
       
       if(read_write==MASTER_REQ_WRITE)
       {
@@ -205,8 +199,7 @@ int main(void)
           {
             /* Error_Handler() function is called when error occurs. */
             Error_Handler();
-          }
-      
+          }      
           while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY){}
         }
         while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
@@ -221,18 +214,49 @@ int main(void)
     }
   }
 #else
-  while(1)
-  {
+while(1)
+  { 
+    if(USB_USART_RX_STA&0x8000)
+    { 
+      read_write = USB_USART_RX_Buffer[3];
+      deviceAddress = USB_USART_RX_Buffer[4];
+      regAddress = USB_USART_RX_Buffer[5];
+      length = USB_USART_RX_Buffer[6];
+      
+      len = USB_USART_RX_STA&0x3FFF;
+      USB_USART_RX_STA=0;
+      
+      for(t=0;t<len-8;t++)
+      {
+        aTxBuffer[t]=USB_USART_RX_Buffer[t+8];
+      }
+      
+      if(read_write==MASTER_REQ_READ)
+      {        
+        Soft_I2C_Read_Reg(deviceAddress, regAddress, aRxBuffer, length);       
+        CDC_Transmit_FS(aRxBuffer, length);
+      }  
+      
+      if(read_write==MASTER_REQ_WRITE)
+      {  
+        Soft_I2C_Send_Reg(deviceAddress, regAddress, aTxBuffer, len-8);
+      }
+    }
     
+    /* Refresh IWDG: reload counter */
+    if(HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
+    {
+      /* Refresh Error */
+      Error_Handler();
+    }
   }
-#endif /* MASTER_BOARD */
+#endif /* HARDWARE_I2C */
 }
 
 /** System Clock Configuration
 */
 void SystemClock_Config(void)
 {
-
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
@@ -295,16 +319,13 @@ void SystemClock_Config(void)
 */
 static void MX_GPIO_Init(void)
 {
-
   /* GPIO Ports Clock Enable */
   //__HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-
 }
 
 static void MX_IWDG_Init(void)
 {
-
   hiwdg.Instance = IWDG;
   hiwdg.Init.Prescaler = IWDG_PRESCALER_64;
   hiwdg.Init.Window = 0xfff;
@@ -313,7 +334,6 @@ static void MX_IWDG_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
 }
 
 /**
@@ -329,37 +349,6 @@ void _Error_Handler(char * file, int line)
   {
   }
   /* USER CODE END Error_Handler_Debug */ 
-}
-
-static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
-{
-  while (BufferLength--)
-  {
-    if ((*pBuffer1) != *pBuffer2)
-    {
-      return BufferLength;
-    }
-    pBuffer1++;
-    pBuffer2++;
-  }
-
-  return 0;
-}
-
-/**
-  * @brief  Flushes the buffer
-  * @param  pBuffer: buffers to be flushed.
-  * @param  BufferLength: buffer's length
-  * @retval None
-  */
-static void Flush_Buffer(uint8_t* pBuffer, uint16_t BufferLength)
-{
-  while (BufferLength--)
-  {
-    *pBuffer = 0;
-
-    pBuffer++;
-  }
 }
 
 #ifdef USE_FULL_ASSERT

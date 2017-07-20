@@ -39,4 +39,6 @@
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))  
 
+void I2C_Init(void);
+
 #endif /* __I2C_H */
