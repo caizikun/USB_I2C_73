@@ -283,36 +283,6 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
     res=Buf[i];
     USB_USART_RX_Buffer[i]=res;
     USB_USART_RX_STA++;
-//    if((USB_USART_RX_STA&0x8000)==0)
-//    {
-//      if(USB_USART_RX_STA&0x4000)
-//      {
-//        if(res!=0x0A)
-//        {
-//          USB_USART_RX_STA = 0;
-//        }
-//        else
-//        {
-//          USB_USART_RX_STA |= 0x8000;
-//        }
-//      }
-//      else
-//      {
-//        if(res==0x0D)
-//        {
-//          USB_USART_RX_STA |= 0x4000;
-//        }
-//        else
-//        {
-//          USB_USART_RX_Buffer[USB_USART_RX_STA&0x3FFF]=res;
-//          USB_USART_RX_STA++;
-//          if(USB_USART_RX_STA>(USB_REC_LEN-1))
-//          {
-//            USB_USART_RX_STA=0;
-//          }
-//        }
-//      }
-//    }
   }  
    USB_USART_RX_STA |= 0x8000;
   

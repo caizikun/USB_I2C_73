@@ -204,7 +204,8 @@ int main(void)
         }
         while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
       }
-    }
+    }   
+    
     
     /* Refresh IWDG: reload counter */
     if(HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
