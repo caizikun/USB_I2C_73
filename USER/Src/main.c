@@ -117,7 +117,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MODSELL_Init();
+  //MODSELL_Init();与模块SWD脚冲突，不能即做普通IO又做SWD
   /* I2C2 init function */ 
 #ifdef HARDWARE_I2C  
   I2C_Init();  
