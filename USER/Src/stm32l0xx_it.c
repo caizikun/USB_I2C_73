@@ -41,7 +41,8 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
-extern I2C_HandleTypeDef I2cHandle;
+extern I2C_HandleTypeDef    hi2c1;
+extern I2C_HandleTypeDef    hi2c2;
 /******************************************************************************/
 /*            Cortex-M0+ Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -137,10 +138,16 @@ void USB_IRQHandler(void)
   /* USER CODE END USB_IRQn 1 */
 }
 
-void I2Cx_IRQHandler(void)
+void I2C1_IRQHandler(void)
 {
-  HAL_I2C_EV_IRQHandler(&I2cHandle);
-  HAL_I2C_ER_IRQHandler(&I2cHandle);  
+  HAL_I2C_EV_IRQHandler(&hi2c1);
+  HAL_I2C_ER_IRQHandler(&hi2c1); 
+}
+
+void I2C2_IRQHandler(void)
+{
+  HAL_I2C_EV_IRQHandler(&hi2c2);
+  HAL_I2C_ER_IRQHandler(&hi2c2);  
 }
 
 

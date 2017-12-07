@@ -49,7 +49,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l0xx_hal.h"
 #include "i2c.h"
-
+#include "max5417.h"
+    
 extern void _Error_Handler(char *, int);
 /* USER CODE BEGIN 0 */
 
@@ -57,63 +58,83 @@ extern void _Error_Handler(char *, int);
 /**
   * Initializes the Global MSP.
   */
-void HAL_MspInit(void)
-{
-  /* USER CODE BEGIN MspInit 0 */
-
-  /* USER CODE END MspInit 0 */
-
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-  __HAL_RCC_PWR_CLK_ENABLE();
-
-  /* System interrupt init*/
-  /* SVC_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SVC_IRQn, 0, 0);
-  /* PendSV_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-
-  /* USER CODE BEGIN MspInit 1 */
-
-  /* USER CODE END MspInit 1 */
-}
-
 void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
-  RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
-  
-  /*##-1- Configure the I2C clock source. The clock is derived from the SYSCLK #*/
-  RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2Cx;
-//  RCC_PeriphCLKInitStruct. = RCC_I2CxCLKSOURCE_SYSCLK;
-  HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
-
-  /*##-2- Enable peripherals and GPIO Clocks #################################*/
-  /* Enable GPIO TX/RX clock */
-  I2Cx_SCL_GPIO_CLK_ENABLE();
-  I2Cx_SDA_GPIO_CLK_ENABLE();
-  /* Enable I2Cx clock */
-  I2Cx_CLK_ENABLE(); 
-
-  /*##-3- Configure peripheral GPIO ##########################################*/  
-  /* I2C TX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = I2Cx_SCL_PIN;
-  GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Pull      = GPIO_PULLUP;
-  GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(I2Cx_SCL_GPIO_PORT, &GPIO_InitStruct);
+  if(hi2c->Instance==I2C1)
+  {
+    RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
     
-  /* I2C RX GPIO pin configuration  */
-  GPIO_InitStruct.Pin       = I2Cx_SDA_PIN;
-  GPIO_InitStruct.Alternate = I2Cx_SCL_SDA_AF;
-  HAL_GPIO_Init(I2Cx_SDA_GPIO_PORT, &GPIO_InitStruct);
+    /*##-1- Configure the I2C clock source. The clock is derived from the SYSCLK #*/
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+    RCC_PeriphCLKInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+
+    /*##-2- Enable peripherals and GPIO Clocks #################################*/
+    /* Enable GPIO TX/RX clock */
+    I2C1_SCL_GPIO_CLK_ENABLE();
+    I2C1_SDA_GPIO_CLK_ENABLE();
+    /* Enable I2Cx clock */
+    I2C1_CLK_ENABLE(); 
+
+    /*##-3- Configure peripheral GPIO ##########################################*/  
+    /* I2C TX GPIO pin configuration  */
+    GPIO_InitStruct.Pin       = I2C1_SCL_PIN;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
+    GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = I2C1_SCL_SDA_AF;
+    HAL_GPIO_Init(I2C1_SCL_GPIO_PORT, &GPIO_InitStruct);
+      
+    /* I2C RX GPIO pin configuration  */
+    GPIO_InitStruct.Pin       = I2C1_SDA_PIN;
+    GPIO_InitStruct.Alternate = I2C1_SCL_SDA_AF;
+    HAL_GPIO_Init(I2C1_SDA_GPIO_PORT, &GPIO_InitStruct);
+      
+    /*##-4- Configure the NVIC for I2C ########################################*/   
+    /* NVIC for I2Cx */
+    HAL_NVIC_SetPriority(I2C1_IRQn, 0, 1);
+    HAL_NVIC_EnableIRQ(I2C1_IRQn);
+  }
+  else if(hi2c->Instance==I2C2)
+  {
+    RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
     
-  /*##-4- Configure the NVIC for I2C ########################################*/   
-  /* NVIC for I2Cx */
-  HAL_NVIC_SetPriority(I2Cx_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(I2Cx_IRQn);
+    /*##-1- Configure the I2C clock source. The clock is derived from the SYSCLK #*/
+    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
+    //RCC_PeriphCLKInitStruct.I2c1ClockSelection = RCC_I2CxCLKSOURCE_SYSCLK;
+    HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+
+    /*##-2- Enable peripherals and GPIO Clocks #################################*/
+    /* Enable GPIO TX/RX clock */
+    I2C2_SCL_GPIO_CLK_ENABLE();
+    I2C2_SDA_GPIO_CLK_ENABLE();
+    /* Enable I2Cx clock */
+    I2C2_CLK_ENABLE(); 
+
+    /*##-3- Configure peripheral GPIO ##########################################*/  
+    /* I2C TX GPIO pin configuration  */
+    GPIO_InitStruct.Pin       = I2C2_SCL_PIN;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
+    GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = I2C2_SCL_SDA_AF;
+    HAL_GPIO_Init(I2C2_SCL_GPIO_PORT, &GPIO_InitStruct);
+      
+    /* I2C RX GPIO pin configuration  */
+    GPIO_InitStruct.Pin       = I2C2_SDA_PIN;
+    GPIO_InitStruct.Alternate = I2C2_SCL_SDA_AF;
+    HAL_GPIO_Init(I2C2_SDA_GPIO_PORT, &GPIO_InitStruct);
+      
+    /*##-4- Configure the NVIC for I2C ########################################*/   
+    /* NVIC for I2Cx */
+    HAL_NVIC_SetPriority(I2C2_IRQn, 0, 1);
+    HAL_NVIC_EnableIRQ(I2C2_IRQn);
+  }
+  else if(hi2c->Instance==I2C3)
+  { 
+ 
+  }
 }
 
 /**
@@ -126,19 +147,40 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
   */
 void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c)
 {
+  if(hi2c->Instance==I2C1)
+  {
   
-  /*##-1- Reset peripherals ##################################################*/
-  I2Cx_FORCE_RESET();
-  I2Cx_RELEASE_RESET();
+    /*##-1- Reset peripherals ##################################################*/
+    I2C1_FORCE_RESET();
+    I2C1_RELEASE_RESET();
 
-  /*##-2- Disable peripherals and GPIO Clocks #################################*/
-  /* Configure I2C Tx as alternate function  */
-  HAL_GPIO_DeInit(I2Cx_SCL_GPIO_PORT, I2Cx_SCL_PIN);
-  /* Configure I2C Rx as alternate function  */
-  HAL_GPIO_DeInit(I2Cx_SDA_GPIO_PORT, I2Cx_SDA_PIN);
-  
-  /*##-3- Disable the NVIC for I2C ##########################################*/
-  HAL_NVIC_DisableIRQ(I2Cx_IRQn);
+    /*##-2- Disable peripherals and GPIO Clocks #################################*/
+    /* Configure I2C Tx as alternate function  */
+    HAL_GPIO_DeInit(I2C1_SCL_GPIO_PORT, I2C1_SCL_PIN);
+    /* Configure I2C Rx as alternate function  */
+    HAL_GPIO_DeInit(I2C1_SDA_GPIO_PORT, I2C1_SDA_PIN);
+    
+    /*##-3- Disable the NVIC for I2C ##########################################*/
+    HAL_NVIC_DisableIRQ(I2C1_IRQn);
+  }
+  else if(hi2c->Instance==I2C2)
+  {
+    /*##-1- Reset peripherals ##################################################*/
+    I2C2_FORCE_RESET();
+    I2C2_RELEASE_RESET();
+
+    /*##-2- Disable peripherals and GPIO Clocks #################################*/
+    /* Configure I2C Tx as alternate function  */
+    HAL_GPIO_DeInit(I2C2_SCL_GPIO_PORT, I2C2_SCL_PIN);
+    /* Configure I2C Rx as alternate function  */
+    HAL_GPIO_DeInit(I2C2_SDA_GPIO_PORT, I2C2_SDA_PIN);
+    
+    /*##-3- Disable the NVIC for I2C ##########################################*/
+    HAL_NVIC_DisableIRQ(I2C2_IRQn);
+  }
+  else if(hi2c->Instance==I2C3)
+  {
+  }
 }
 
 /* USER CODE BEGIN 1 */

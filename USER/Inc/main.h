@@ -67,8 +67,6 @@ void _Error_Handler(char *, int);
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 
 /* Definition for I2Cx's NVIC */
-#define I2Cx_IRQn                       I2C2_IRQn
-#define I2Cx_IRQHandler                 I2C2_IRQHandler
 #define HARDWARE_I2C
 /**
   * @}

@@ -54,6 +54,7 @@
 #include "stm32l0xx_nucleo.h"
 #include "usbd_cdc_if.h"
 #include "modsel.h"
+#include "max5417.h"
 
 /* Buffer used for transmission */
 //uint8_t aTxBuffer[] = {0x33, 0x34};
@@ -71,7 +72,7 @@ uint8_t bTransferRequest = 0;
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef I2cHandle;
+I2C_HandleTypeDef hi2c2;
 IWDG_HandleTypeDef hiwdg;
 
 /* USER CODE BEGIN PV */
@@ -120,10 +121,13 @@ int main(void)
   //MODSELL_Init();与模块SWD脚冲突，不能即做普通IO又做SWD
   /* I2C2 init function */ 
 #ifdef HARDWARE_I2C  
-  I2C_Init();  
+  I2C2_Init();  
 #else 
   Soft_I2C_Init();
 #endif /* HARDWARE_I2C */
+  
+  max5417_Init();
+  max5417_3v3();
   
   MX_IWDG_Init();
   MX_USB_DEVICE_Init();
@@ -179,14 +183,14 @@ int main(void)
       {
         do
         {
-          if(HAL_I2C_Mem_Read_IT(&I2cHandle, (uint16_t)deviceAddress, regAddress, I2C_MEMADD_SIZE_8BIT, (uint8_t*)aRxBuffer, length)!= HAL_OK)
+          if(HAL_I2C_Mem_Read_IT(&hi2c2, (uint16_t)deviceAddress, regAddress, I2C_MEMADD_SIZE_8BIT, (uint8_t*)aRxBuffer, length)!= HAL_OK)
           {
             /* Error_Handler() function is called when error occurs. */
             Error_Handler();
           }          
-          while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY){}
+          while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY){}
         }
-        while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
+        while(HAL_I2C_GetError(&hi2c2) == HAL_I2C_ERROR_AF);
         
         CDC_Transmit_FS(aRxBuffer, length);       
       }
@@ -195,14 +199,14 @@ int main(void)
       {
         do
         {
-          if(HAL_I2C_Mem_Write_IT(&I2cHandle, (uint16_t)deviceAddress, regAddress, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&aTxBuffer, len-8)!= HAL_OK)
+          if(HAL_I2C_Mem_Write_IT(&hi2c2, (uint16_t)deviceAddress, regAddress, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&aTxBuffer, len-8)!= HAL_OK)
           {
             /* Error_Handler() function is called when error occurs. */
             Error_Handler();
           }      
-          while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY){}
+          while (HAL_I2C_GetState(&hi2c2) != HAL_I2C_STATE_READY){}
         }
-        while(HAL_I2C_GetError(&I2cHandle) == HAL_I2C_ERROR_AF);
+        while(HAL_I2C_GetError(&hi2c2) == HAL_I2C_ERROR_AF);
       }
     }   
     
