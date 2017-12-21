@@ -126,8 +126,8 @@ int main(void)
   Soft_I2C_Init();
 #endif /* HARDWARE_I2C */
   
-  max5417_Init();
-  max5417_3v3();
+  //max5417_Init();
+  //max5417_3v3();//need 5v powersupply
   
   MX_IWDG_Init();
   MX_USB_DEVICE_Init();

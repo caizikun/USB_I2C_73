@@ -16,7 +16,7 @@ void max5417_Init(void)
 
   if(HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
-
+      Error_Handler();
   }
 
   /* Enable the Analog I2C Filter */
@@ -24,14 +24,14 @@ void max5417_Init(void)
 
   if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
   {
-
+      Error_Handler();
   }
 
     /**Configure Digital filter 
     */
   if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
   {
-    
+      Error_Handler();
   }
 }
 
