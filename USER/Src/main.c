@@ -54,6 +54,7 @@
 #include "stm32l0xx_nucleo.h"
 #include "usbd_cdc_if.h"
 #include "modsel.h"
+#include "lpmode.h"
 #include "max5417.h"
 
 /* Buffer used for transmission */
@@ -118,16 +119,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MODSELL_Init();与模块SWD脚冲突，不能即做普通IO又做SWD
+  MODSELL_Init();//与模块SWD脚冲突，不能即做普通IO又做SWD
+  LPMODE_Init();//set lpmode to low
   /* I2C2 init function */ 
 #ifdef HARDWARE_I2C  
   I2C2_Init();  
 #else 
-  Soft_I2C_Init();
+  Soft_I2C_Init();                                                                                                                                                     
 #endif /* HARDWARE_I2C */
   
-  //max5417_Init();
-  //max5417_3v3();//need 5v powersupply
+  max5417_Init();
+  max5417_3v3();//need 5v powersupply
   
   MX_IWDG_Init();
   MX_USB_DEVICE_Init();

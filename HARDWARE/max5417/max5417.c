@@ -90,5 +90,5 @@ void max5417_3v15()
 
 void max5417_3v3()
 {
-   max5417_save(0x84);
+   max5417_save(0x79);
 }

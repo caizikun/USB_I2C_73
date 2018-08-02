@@ -2385,6 +2385,9 @@
             <name>$PROJ_DIR$\HARDWARE\I2C\i2c.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\HARDWARE\lpmode\lpmode.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\HARDWARE\max5417\max5417.c</name>
         </file>
         <file>

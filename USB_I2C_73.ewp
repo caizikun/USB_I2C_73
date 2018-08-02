@@ -343,6 +343,7 @@
                     <state>$PROJ_DIR$\HARDWARE\I2C</state>
                     <state>$PROJ_DIR$\HARDWARE\ModSeLL</state>
                     <state>$PROJ_DIR$\HARDWARE\max5417</state>
+                    <state>$PROJ_DIR$\HARDWARE\lpmode</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -642,7 +643,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>USB_I2C_000001.hex</state>
+                    <state>USB_I2C_20180802.hex</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -2101,6 +2102,9 @@
         <name>HARDWARE</name>
         <file>
             <name>$PROJ_DIR$\HARDWARE\I2C\i2c.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\HARDWARE\lpmode\lpmode.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\HARDWARE\max5417\max5417.c</name>
